@@ -1,13 +1,16 @@
 import { Route, Routes } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { HomePage } from './pages/HomePage';
-import './App.css';
+import { PrivateRoute } from './components/PrivateRoute/PrivateRoute';
 
 export const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
+
+      <Route element={<PrivateRoute />}>
+        <Route path="/" element={<HomePage />} />
+      </Route>
     </Routes>
   );
 };
