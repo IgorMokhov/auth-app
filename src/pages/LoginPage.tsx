@@ -1,9 +1,9 @@
-import { Login } from '../components/Login/Login';
+import { LoginProcess } from '../components/LoginProcess/LoginProcess';
 
 export const LoginPage = () => {
   return (
     <div>
-      <Login />
+      <LoginProcess />
     </div>
   );
 };
