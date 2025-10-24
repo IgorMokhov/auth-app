@@ -2,25 +2,24 @@ import { useEffect } from 'react';
 import { useLogin } from '../../hooks/useLogin';
 import { Button, Form, Input, type FormProps } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import type { Credentials } from '../../types/auth';
+import { ErrorCode, type Credentials } from '../../types/auth';
 import styles from './style.module.css';
 
 type LoginFormProps = {
-  onSuccess: (credentials: Credentials) => void;
+  onVerify: (credentials: Credentials) => void;
 };
 
-export const LoginForm = ({ onSuccess }: LoginFormProps) => {
-  const { login, isLoadingLogin, isSuccessLogin, isErrorLogin, errorLogin } =
-    useLogin();
+export const LoginForm = ({ onVerify }: LoginFormProps) => {
+  const { login, isLoadingLogin, isErrorLogin, errorLogin } = useLogin();
   const [form] = Form.useForm();
-
-  const onFinish: FormProps<Credentials>['onFinish'] = ({ email, password }) => {
-    login({ email, password });
-  };
 
   const email = Form.useWatch('email', form);
   const password = Form.useWatch('password', form);
   const isDisabled = !email || !password || password?.length < 6;
+
+  const onFinish: FormProps<Credentials>['onFinish'] = ({ email, password }) => {
+    login({ email, password });
+  };
 
   useEffect(() => {
     if (isErrorLogin && errorLogin?.message) {
@@ -35,11 +34,10 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
         },
       ]);
     }
+    if (isErrorLogin && errorLogin?.code === ErrorCode.TWO_FA_REQUIRED) {
+      onVerify({ email, password });
+    }
   }, [isErrorLogin, errorLogin, form]);
-
-  useEffect(() => {
-    if (isSuccessLogin) onSuccess({ email, password });
-  }, [isSuccessLogin]);
 
   return (
     <Form form={form} name="login" onFinish={onFinish} className={styles.loginForm}>

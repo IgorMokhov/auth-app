@@ -1,12 +1,8 @@
 import { Button, Form, Input } from 'antd';
-import { useVerifyCode } from '../../hooks/useVerifyCode';
-import styles from './style.module.css';
 import { useEffect, useRef, useState } from 'react';
 import { useLogin } from '../../hooks/useLogin';
-import { VerifyErrorCode } from '../../types/auth';
-import { useNavigate } from 'react-router-dom';
-import { setToken } from '../../utils/auth';
-import { isVerifySuccess } from '../../utils/typeGuards';
+import { ErrorCode } from '../../types/auth';
+import styles from './style.module.css';
 
 type VerifyCodeFormProps = {
   email: string | null;
@@ -14,14 +10,11 @@ type VerifyCodeFormProps = {
 };
 
 export const VerifyCodeForm = ({ email, password }: VerifyCodeFormProps) => {
-  const { verify, dataVerify, isSuccessVerify, isErrorVerify, errorVerify } =
-    useVerifyCode();
   const { login, isLoadingLogin, isErrorLogin, errorLogin } = useLogin();
 
   const [form] = Form.useForm();
   const code = Form.useWatch('code', form);
 
-  const navigate = useNavigate();
   const [wasVerified, setWasVerified] = useState(false);
   const prevCode = useRef<string | undefined>(undefined);
   const isComplete = code?.length === 6;
@@ -35,23 +28,8 @@ export const VerifyCodeForm = ({ email, password }: VerifyCodeFormProps) => {
     }
   };
 
-  const onSuccessVerifyHandler = () => {
-    if (isSuccessVerify && dataVerify && isVerifySuccess(dataVerify)) {
-      setToken(dataVerify.accessToken);
-      navigate('/');
-    }
-  };
-
   useEffect(() => {
-    if (isErrorVerify && errorVerify?.errorCode) {
-      form.setFields([
-        {
-          name: 'code',
-          errors: [errorVerify.message],
-        },
-      ]);
-    }
-    if (isErrorLogin && errorLogin?.errorCode) {
+    if (isErrorLogin && errorLogin?.code) {
       form.setFields([
         {
           name: 'code',
@@ -59,15 +37,15 @@ export const VerifyCodeForm = ({ email, password }: VerifyCodeFormProps) => {
         },
       ]);
     }
-  }, [isErrorVerify, errorVerify, isErrorLogin, errorLogin, form]);
+  }, [isErrorLogin, errorLogin, form]);
 
   useEffect(() => {
-    if (canVerify) {
+    if (canVerify && email && password) {
       prevCode.current = code;
-      verify({ email, code });
+      login({ email, password, code });
       setWasVerified(true);
     }
-  }, [isComplete, email, code, verify, wasVerified]);
+  }, [canVerify, email, code, password, wasVerified]);
 
   useEffect(() => {
     if (wasVerified && code !== prevCode.current) {
@@ -84,21 +62,14 @@ export const VerifyCodeForm = ({ email, password }: VerifyCodeFormProps) => {
         <Input.OTP size="large" length={6} autoFocus />
       </Form.Item>
 
-      {isSuccessVerify && (
-        <Form.Item>
-          <Button type="primary" block onClick={onSuccessVerifyHandler}>
-            Continue
-          </Button>
-        </Form.Item>
-      )}
-      {isErrorVerify && errorVerify?.errorCode === VerifyErrorCode.INVALID && (
+      {isErrorLogin && errorLogin?.code === ErrorCode.INVALID_CODE && (
         <Form.Item>
           <Button disabled type="primary" block>
             Continue
           </Button>
         </Form.Item>
       )}
-      {isErrorVerify && errorVerify?.errorCode === VerifyErrorCode.EXPIRED && (
+      {isErrorLogin && errorLogin?.code === ErrorCode.TWO_FA_EXPIRED && (
         <Form.Item>
           <Button
             onClick={onLoginHandler}

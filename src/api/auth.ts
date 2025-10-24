@@ -1,59 +1,66 @@
-import {
-  MockUser,
-  type Credentials,
-  type LoginResponse,
-  type Verify,
-  type VerifyResponse,
-} from '../types/auth';
+import { MockUser, type Credentials, type LoginResponse } from '../types/auth';
 
 export const mockSignIn = async ({
   email,
   password,
+  code,
 }: Credentials): Promise<LoginResponse> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (email === MockUser.EMAIL && password === MockUser.PASSWORD) {
+      if (email === MockUser.EMAIL_WITHOUT_CODE && password === MockUser.PASSWORD) {
         resolve({
-          success: true,
-          requires2FA: true,
-        });
-      } else {
-        reject({
-          success: false,
-          errorCode: 'INVALID_CREDENTIALS',
-          message: 'Invalid email or password',
+          token: 'mock-token',
         });
       }
-    }, 1000);
-  });
-};
-
-export const mockVerify2FA = async ({
-  email,
-  code,
-}: Verify): Promise<VerifyResponse> => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (email === MockUser.EMAIL && code === MockUser.CODE) {
+      if (
+        email === MockUser.EMAIL_WITH_CODE &&
+        password === MockUser.PASSWORD &&
+        code === MockUser.CODE
+      ) {
         resolve({
-          success: true,
-          accessToken: 'mock-token',
+          token: 'mock-token',
         });
       }
-      if (email === MockUser.EMAIL && code === MockUser.EXPIRED_CODE) {
+      if (
+        email === MockUser.EMAIL_WITH_CODE &&
+        password === MockUser.PASSWORD &&
+        !code
+      ) {
         reject({
-          success: false,
-          errorCode: '2FA_EXPIRED',
-          message: 'Code has expired',
+          message: 'Two factor authentication code required',
+          code: 'TWO_FA_REQUIRED',
         });
       }
-      if (email === MockUser.EMAIL && code !== MockUser.CODE) {
+      if (
+        email === MockUser.EMAIL_WITH_CODE &&
+        password === MockUser.PASSWORD &&
+        code === MockUser.EXPIRED_CODE
+      ) {
         reject({
-          success: false,
-          errorCode: '2FA_INVALID',
+          message: 'Code was expired',
+          code: 'TWO_FA_EXPIRED',
+        });
+      }
+      if (
+        email === MockUser.EMAIL_WITH_CODE &&
+        password === MockUser.PASSWORD &&
+        code !== MockUser.CODE
+      ) {
+        reject({
           message: 'Invalid code',
+          code: 'INVALID_CODE',
         });
       }
-    }, 500);
+      if (email == MockUser.INVALID_EMAIL || password !== MockUser.PASSWORD) {
+        reject({
+          message: 'Invalid username or password',
+          code: 'WRONG_PASSWORD',
+        });
+      }
+      reject({
+        message: 'Something went wrong',
+        code: 'ERROR',
+      });
+    }, 1000);
   });
 };

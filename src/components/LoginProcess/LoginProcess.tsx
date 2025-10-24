@@ -14,13 +14,13 @@ export const LoginProcess = () => {
   const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  const handleLoginSuccess = (credentials: Credentials) => {
+  const handleNextStep = (credentials: Credentials) => {
     setStep('verify');
     setEmail(credentials.email);
     setPassword(credentials.password);
   };
 
-  const handleChangeStep = () => {
+  const handlePrevStep = () => {
     setStep('login');
   };
 
@@ -35,11 +35,11 @@ export const LoginProcess = () => {
       {step === 'verify' && (
         <ArrowLeftOutlined
           className={styles.loginProcessBack}
-          onClick={handleChangeStep}
+          onClick={handlePrevStep}
         />
       )}
       <LoginHeader step={step} />
-      {step === 'login' && <LoginForm onSuccess={handleLoginSuccess} />}
+      {step === 'login' && <LoginForm onVerify={handleNextStep} />}
       {step === 'verify' && <VerifyCodeForm email={email} password={password} />}
     </div>
   );

@@ -4,7 +4,7 @@
 
 Auth App - React Single Page Application.
 
-Test task for the position of "React Developer" 
+Test task for the position of "React Developer"
 
 ## Getting Started
 
@@ -12,7 +12,9 @@ Test task for the position of "React Developer"
 
 Use the following mock credentials for testing authentication flows:
 
-- Email: `info@mail.com`
+- Email with code: `info@mail.com`
+- Email without code: `test@mail.com`
+- Email (invalid): `invalid@mail.com`
 - Password: `123456789`
 - Code (valid): `131311`
 - Code (expired): `111111`

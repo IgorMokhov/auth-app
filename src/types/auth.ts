@@ -1,42 +1,33 @@
 export type Credentials = {
   email: string;
   password: string;
-};
-
-export type Verify = {
-  email: string;
-  code: string;
+  code?: string;
 };
 
 export type Step = 'login' | 'verify';
 
-export enum VerifyErrorCode {
-  EXPIRED = '2FA_EXPIRED',
-  INVALID = '2FA_INVALID',
+export enum ErrorCode {
+  TWO_FA_REQUIRED = 'TWO_FA_REQUIRED',
+  TWO_FA_EXPIRED = 'TWO_FA_EXPIRED',
+  INVALID_CREDENTIALS = 'WRONG_PASSWORD',
+  INVALID_CODE = 'INVALID_CODE',
 }
 
-export type VerifySuccess = {
-  success: boolean;
-  accessToken: string;
-};
-
 export type LoginSuccess = {
-  success: boolean;
-  requires2FA: boolean;
+  token: string;
 };
 
 export type ResponeError = {
-  success: false;
-  errorCode: VerifyErrorCode;
+  code: ErrorCode;
   message: string;
 };
-
-export type VerifyResponse = VerifySuccess | ResponeError;
 
 export type LoginResponse = LoginSuccess | ResponeError;
 
 export enum MockUser {
-  EMAIL = 'info@mail.com',
+  EMAIL_WITH_CODE = 'info@mail.com',
+  EMAIL_WITHOUT_CODE = 'test@mail.com',
+  INVALID_EMAIL = 'invalid@mail.com',
   PASSWORD = '123456789',
   CODE = '131311',
   EXPIRED_CODE = '111111',
